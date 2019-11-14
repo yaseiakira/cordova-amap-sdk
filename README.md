@@ -40,7 +40,7 @@ win.cordova.plugins.AkiraAmapSDK.startNavigation({
                 actualPoints :[[106.1.27.1],[106.2.27.2] ,...... ] // 实际走的定位点
 			*/
         }, (err) => {
-			console.log(err);
+	    console.log(err);
         });
 
 ```
