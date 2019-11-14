@@ -1,0 +1,2 @@
+/src/ios/libs/AMapNaviKit.framework/AMapNaviKit filter=lfs diff=lfs merge=lfs -text
+/src/ios/libs/MAMapKit.framework/MAMapKit filter=lfs diff=lfs merge=lfs -text
