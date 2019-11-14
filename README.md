@@ -96,6 +96,13 @@ win.cordova.plugins.AkiraAmapSDK.getCurrentLocation(
 ```
 
 ## 其他注意事项
-> 如果IOS集成后无法编译,请参考 [高德IOS手动部署](https://lbs.amap.com/api/ios-location-sdk/guide/create-project/manual-configuration)
 
-> [提交AppStore必读](https://lbs.amap.com/api/ios-location-sdk/guide/create-project/idfa-guide)
+1.如果IOS集成后无法编译,请参考 [高德IOS手动部署](https://lbs.amap.com/api/ios-location-sdk/guide/create-project/manual-configuration)
+
+2.[提交AppStore必读](https://lbs.amap.com/api/ios-location-sdk/guide/create-project/idfa-guide)
+
+3.后台持续定位只需开启一次就可以了,无需多次调用该方法,暂时未提供关闭后台定位的方法
+
+4.如果使用了后台持续定位,配合 [cordova-plugin-background-mode](https://github.com/katzer/cordova-plugin-background-mode) 插件效果更佳
+
+5.如果正在使用后台持续定位,那么再次调用一次性定位貌似有点问题,奈何本人水平有限
