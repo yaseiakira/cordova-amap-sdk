@@ -1,0 +1,19 @@
+{
+  "name": "cordova-akira-amap-navigation",
+  "version": "1.0.0",
+  "description": "高德导航插件",
+  "cordova": {
+    "id": "cordova-akira-amap-navigation",
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  },
+  "keywords": [
+    "ecosystem:cordova",
+    "cordova-android",
+    "cordova-ios"
+  ],
+  "author": "Akira",
+  "license": "ISC"
+}

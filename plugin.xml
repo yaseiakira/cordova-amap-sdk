@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<plugin id="cordova-akira-amap-sdk" version="1.0.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+    <name>cordova-akira-amap-sdk</name>
+    <js-module name="AkiraAmapSDK" src="www/AkiraAmapSDK.js">
+        <clobbers target="cordova.plugins.AkiraAmapSDK" />
+    </js-module>
+
+    <preference name="ANDROID_KEY" />
+    <preference name="IOS_KEY" />
+
+    <platform name="android">
+
+        <preference name="ANDROID_SUPPORT_V4_VERSION" default="26.+" />
+        <framework src="com.android.support:support-v4:$ANDROID_SUPPORT_V4_VERSION" />
+
+        <config-file parent="/*" target="res/xml/config.xml">
+            <feature name="AkiraAmapSDK">
+                <param name="android-package" value="com.colorfulsquare.akira.AkiraAmapSDK" />
+            </feature>
+        </config-file>
+
+        <config-file target="AndroidManifest.xml" parent="/manifest" mode="merge">
+            <!--用于进行网络定位-->
+            <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"></uses-permission>
+            <!--用于申请调用A-GPS模块-->
+            <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS"></uses-permission>
+            <!--用于申请获取蓝牙信息进行室内定位-->
+            <uses-permission android:name="android.permission.BLUETOOTH"></uses-permission>
+            <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"></uses-permission>
+            <!--用于访问网络，网络定位需要上网-->
+            <uses-permission android:name="android.permission.INTERNET" />
+            <!--写入扩展存储，向扩展卡写入数据，用于写入缓存定位数据-->
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+            <!--用于进行网络定位-->
+            <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+            <!--获取运营商信息，用于支持提供运营商信息相关的接口-->
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+            <!--用于访问GPS定位-->
+            <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+            <!--用于读取手机当前的状态-->
+            <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+            <!--用于访问wifi网络信息，wifi信息会用于进行网络定位-->
+            <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+            <!--这个权限用于获取wifi的获取权限，wifi信息会用来进行网络定位-->
+            <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+            <!--这个权限用于允许程序在手机屏幕关闭后后台进程仍然运行-->
+            <uses-permission android:name="android.permission.WAKE_LOCK" />
+        </config-file>
+
+        <config-file target="AndroidManifest.xml" parent="/manifest/application" mode="merge">
+            <service android:name="com.amap.api.location.APSService"></service>
+            <activity android:configChanges="orientation|keyboardHidden|screenSize" android:name="com.colorfulsquare.akira.activity.AkiraAmapNaviActivity" android:theme="@android:style/Theme.Light.NoTitleBar" />
+            <meta-data android:name="com.amap.api.v2.apikey" android:value="$ANDROID_KEY" />
+        </config-file>
+
+        <source-file src="src/android/AkiraAmapSDK.java" target-dir="src/com/colorfulsquare/akira" />
+        <source-file src="src/android/AkiraResourceManager.java" target-dir="src/com/colorfulsquare/akira" />
+        <source-file src="src/android/activity/CheckPermissionsActivity.java" target-dir="src/com/colorfulsquare/akira/activity" />
+        <source-file src="src/android/activity/AkiraAmapNaviActivity.java" target-dir="src/com/colorfulsquare/akira/activity" />
+        <source-file src="src/android/model/NavigationResult.java" target-dir="src/com/colorfulsquare/akira/model" />
+
+        <source-file src="src/android/libs/AMap3DMap_6.9.4_AMapNavi_6.9.1_AMapLocation_4.7.0_20190831.jar" target-dir="../../libs" />
+
+
+        <resource-file src="src/android/res/drawable/black_click_selector.xml" target="res/drawable/black_click_selector.xml" />
+        <resource-file src="src/android/res/drawable/border.xml" target="res/drawable/border.xml" />
+        <resource-file src="src/android/res/drawable/down.png" target="res/drawable/down.png" />
+        <resource-file src="src/android/res/drawable/landback_0.png" target="res/drawable/landback_0.png" />
+        <resource-file src="src/android/res/drawable/landback_1.png" target="res/drawable/landback_1.png" />
+        <resource-file src="src/android/res/drawable/landback_2.png" target="res/drawable/landback_2.png" />
+        <resource-file src="src/android/res/drawable/landback_3.png" target="res/drawable/landback_3.png" />
+        <resource-file src="src/android/res/drawable/landback_4.png" target="res/drawable/landback_4.png" />
+        <resource-file src="src/android/res/drawable/landback_5.png" target="res/drawable/landback_5.png" />
+        <resource-file src="src/android/res/drawable/landback_6.png" target="res/drawable/landback_6.png" />
+        <resource-file src="src/android/res/drawable/landback_7.png" target="res/drawable/landback_7.png" />
+        <resource-file src="src/android/res/drawable/landback_8.png" target="res/drawable/landback_8.png" />
+        <resource-file src="src/android/res/drawable/landback_9.png" target="res/drawable/landback_9.png" />
+        <resource-file src="src/android/res/drawable/landback_a.png" target="res/drawable/landback_a.png" />
+        <resource-file src="src/android/res/drawable/landback_b.png" target="res/drawable/landback_b.png" />
+        <resource-file src="src/android/res/drawable/landback_c.png" target="res/drawable/landback_c.png" />
+        <resource-file src="src/android/res/drawable/landback_d.png" target="res/drawable/landback_d.png" />
+        <resource-file src="src/android/res/drawable/landback_e.png" target="res/drawable/landback_e.png" />
+        <resource-file src="src/android/res/drawable/landback_f.png" target="res/drawable/landback_f.png" />
+        <resource-file src="src/android/res/drawable/landback_g.png" target="res/drawable/landback_g.png" />
+        <resource-file src="src/android/res/drawable/landback_h.png" target="res/drawable/landback_h.png" />
+        <resource-file src="src/android/res/drawable/landback_i.png" target="res/drawable/landback_i.png" />
+        <resource-file src="src/android/res/drawable/landback_j.png" target="res/drawable/landback_j.png" />
+        <resource-file src="src/android/res/drawable/landback_k.png" target="res/drawable/landback_k.png" />
+        <resource-file src="src/android/res/drawable/landback_l.png" target="res/drawable/landback_l.png" />
+        <resource-file src="src/android/res/drawable/landfront_00.png" target="res/drawable/landfront_00.png" />
+        <resource-file src="src/android/res/drawable/landfront_0.png" target="res/drawable/landfront_0.png" />
+        <resource-file src="src/android/res/drawable/landfront_1.png" target="res/drawable/landfront_1.png" />
+        <resource-file src="src/android/res/drawable/landfront_3.png" target="res/drawable/landfront_3.png" />
+        <resource-file src="src/android/res/drawable/landfront_5.png" target="res/drawable/landfront_5.png" />
+        <resource-file src="src/android/res/drawable/landfront_8.png" target="res/drawable/landfront_8.png" />
+        <resource-file src="src/android/res/drawable/landfront_11.png" target="res/drawable/landfront_11.png" />
+        <resource-file src="src/android/res/drawable/landfront_20.png" target="res/drawable/landfront_20.png" />
+        <resource-file src="src/android/res/drawable/landfront_21.png" target="res/drawable/landfront_21.png" />
+        <resource-file src="src/android/res/drawable/landfront_22.png" target="res/drawable/landfront_22.png" />
+        <resource-file src="src/android/res/drawable/landfront_33.png" target="res/drawable/landfront_33.png" />
+        <resource-file src="src/android/res/drawable/landfront_40.png" target="res/drawable/landfront_40.png" />
+        <resource-file src="src/android/res/drawable/landfront_43.png" target="res/drawable/landfront_43.png" />
+        <resource-file src="src/android/res/drawable/landfront_44.png" target="res/drawable/landfront_44.png" />
+        <resource-file src="src/android/res/drawable/landfront_55.png" target="res/drawable/landfront_55.png" />
+        <resource-file src="src/android/res/drawable/landfront_61.png" target="res/drawable/landfront_61.png" />
+        <resource-file src="src/android/res/drawable/landfront_63.png" target="res/drawable/landfront_63.png" />
+        <resource-file src="src/android/res/drawable/landfront_66.png" target="res/drawable/landfront_66.png" />
+        <resource-file src="src/android/res/drawable/landfront_70.png" target="res/drawable/landfront_70.png" />
+        <resource-file src="src/android/res/drawable/landfront_71.png" target="res/drawable/landfront_71.png" />
+        <resource-file src="src/android/res/drawable/landfront_73.png" target="res/drawable/landfront_73.png" />
+        <resource-file src="src/android/res/drawable/landfront_77.png" target="res/drawable/landfront_77.png" />
+        <resource-file src="src/android/res/drawable/landfront_88.png" target="res/drawable/landfront_88.png" />
+        <resource-file src="src/android/res/drawable/landfront_90.png" target="res/drawable/landfront_90.png" />
+        <resource-file src="src/android/res/drawable/landfront_95.png" target="res/drawable/landfront_95.png" />
+        <resource-file src="src/android/res/drawable/landfront_99.png" target="res/drawable/landfront_99.png" />
+        <resource-file src="src/android/res/drawable/landfront_a0.png" target="res/drawable/landfront_a0.png" />
+        <resource-file src="src/android/res/drawable/landfront_a8.png" target="res/drawable/landfront_a8.png" />
+        <resource-file src="src/android/res/drawable/landfront_aa.png" target="res/drawable/landfront_aa.png" />
+        <resource-file src="src/android/res/drawable/landfront_b1.png" target="res/drawable/landfront_b1.png" />
+        <resource-file src="src/android/res/drawable/landfront_b5.png" target="res/drawable/landfront_b5.png" />
+        <resource-file src="src/android/res/drawable/landfront_bb.png" target="res/drawable/landfront_bb.png" />
+        <resource-file src="src/android/res/drawable/landfront_c3.png" target="res/drawable/landfront_c3.png" />
+        <resource-file src="src/android/res/drawable/landfront_c8.png" target="res/drawable/landfront_c8.png" />
+        <resource-file src="src/android/res/drawable/landfront_cc.png" target="res/drawable/landfront_cc.png" />
+        <resource-file src="src/android/res/drawable/landfront_d.png" target="res/drawable/landfront_d.png" />
+        <resource-file src="src/android/res/drawable/landfront_dd.png" target="res/drawable/landfront_dd.png" />
+        <resource-file src="src/android/res/drawable/landfront_e1.png" target="res/drawable/landfront_e1.png" />
+        <resource-file src="src/android/res/drawable/landfront_e5.png" target="res/drawable/landfront_e5.png" />
+        <resource-file src="src/android/res/drawable/landfront_ee.png" target="res/drawable/landfront_ee.png" />
+        <resource-file src="src/android/res/drawable/landfront_f0.png" target="res/drawable/landfront_f0.png" />
+        <resource-file src="src/android/res/drawable/landfront_f1.png" target="res/drawable/landfront_f1.png" />
+        <resource-file src="src/android/res/drawable/landfront_f5.png" target="res/drawable/landfront_f5.png" />
+        <resource-file src="src/android/res/drawable/landfront_ff.png" target="res/drawable/landfront_ff.png" />
+        <resource-file src="src/android/res/drawable/landfront_g3.png" target="res/drawable/landfront_g3.png" />
+        <resource-file src="src/android/res/drawable/landfront_g5.png" target="res/drawable/landfront_g5.png" />
+        <resource-file src="src/android/res/drawable/landfront_gg.png" target="res/drawable/landfront_gg.png" />
+        <resource-file src="src/android/res/drawable/landfront_h1.png" target="res/drawable/landfront_h1.png" />
+        <resource-file src="src/android/res/drawable/landfront_h3.png" target="res/drawable/landfront_h3.png" />
+        <resource-file src="src/android/res/drawable/landfront_h5.png" target="res/drawable/landfront_h5.png" />
+        <resource-file src="src/android/res/drawable/landfront_hh.png" target="res/drawable/landfront_hh.png" />
+        <resource-file src="src/android/res/drawable/landfront_i0.png" target="res/drawable/landfront_i0.png" />
+        <resource-file src="src/android/res/drawable/landfront_i3.png" target="res/drawable/landfront_i3.png" />
+        <resource-file src="src/android/res/drawable/landfront_i5.png" target="res/drawable/landfront_i5.png" />
+        <resource-file src="src/android/res/drawable/landfront_ii.png" target="res/drawable/landfront_ii.png" />
+        <resource-file src="src/android/res/drawable/landfront_j1.png" target="res/drawable/landfront_j1.png" />
+        <resource-file src="src/android/res/drawable/landfront_j8.png" target="res/drawable/landfront_j8.png" />
+        <resource-file src="src/android/res/drawable/landfront_jj.png" target="res/drawable/landfront_jj.png" />
+        <resource-file src="src/android/res/drawable/landfront_kk.png" target="res/drawable/landfront_kk.png" />
+        <resource-file src="src/android/res/drawable/landfront_ll.png" target="res/drawable/landfront_ll.png" />
+        <resource-file src="src/android/res/drawable/lbs_custtexture_dott_gray.png" target="res/drawable/lbs_custtexture_dott_gray.png" />
+        <resource-file src="src/android/res/drawable/lbs_navi_tmcbar_cursor.png" target="res/drawable/lbs_navi_tmcbar_cursor.png" />
+        <resource-file src="src/android/res/drawable/navi_arrow_leftline.png" target="res/drawable/navi_arrow_leftline.png" />
+        <resource-file src="src/android/res/drawable/navi_lane_shape_bg_center.xml" target="res/drawable/navi_lane_shape_bg_center.xml" />
+        <resource-file src="src/android/res/drawable/navi_lane_shape_bg_left.xml" target="res/drawable/navi_lane_shape_bg_left.xml" />
+        <resource-file src="src/android/res/drawable/navi_lane_shape_bg_over.xml" target="res/drawable/navi_lane_shape_bg_over.xml" />
+        <resource-file src="src/android/res/drawable/navi_lane_shape_bg_right.xml" target="res/drawable/navi_lane_shape_bg_right.xml" />
+        <resource-file src="src/android/res/drawable/pressednooutborder.xml" target="res/drawable/pressednooutborder.xml" />
+        <resource-file src="src/android/res/drawable/shape.xml" target="res/drawable/shape.xml" />
+        <resource-file src="src/android/res/drawable/shape_textcursor.xml" target="res/drawable/shape_textcursor.xml" />
+        <resource-file src="src/android/res/drawable/startborder.xml" target="res/drawable/startborder.xml" />
+        <resource-file src="src/android/res/drawable/up.png" target="res/drawable/up.png" />
+        <resource-file src="src/android/res/drawable/whiteborder.xml" target="res/drawable/whiteborder.xml" />
+        <resource-file src="src/android/res/drawable/whitedownborder.xml" target="res/drawable/whitedownborder.xml" />
+        <resource-file src="src/android/res/drawable/whitenooutborder.xml" target="res/drawable/whitenooutborder.xml" />
+
+
+        <resource-file src="src\android\res\drawable-hdpi\action_end.png" target="res\drawable-hdpi\action_end.png" />
+        <resource-file src="src\android\res\drawable-hdpi\action_start.png" target="res\drawable-hdpi\action_start.png" />
+        <resource-file src="src\android\res\drawable-hdpi\action0.png" target="res\drawable-hdpi\action0.png" />
+        <resource-file src="src\android\res\drawable-hdpi\action1.png" target="res\drawable-hdpi\action1.png" />
+        <resource-file src="src\android\res\drawable-hdpi\action2.png" target="res\drawable-hdpi\action2.png" />
+        <resource-file src="src\android\res\drawable-hdpi\action3.png" target="res\drawable-hdpi\action3.png" />
+        <resource-file src="src\android\res\drawable-hdpi\action4.png" target="res\drawable-hdpi\action4.png" />
+        <resource-file src="src\android\res\drawable-hdpi\action5.png" target="res\drawable-hdpi\action5.png" />
+        <resource-file src="src\android\res\drawable-hdpi\action6.png" target="res\drawable-hdpi\action6.png" />
+        <resource-file src="src\android\res\drawable-hdpi\action7.png" target="res\drawable-hdpi\action7.png" />
+        <resource-file src="src\android\res\drawable-hdpi\action8.png" target="res\drawable-hdpi\action8.png" />
+        <resource-file src="src\android\res\drawable-hdpi\action9.png" target="res\drawable-hdpi\action9.png" />
+        <resource-file src="src\android\res\drawable-hdpi\action10.png" target="res\drawable-hdpi\action10.png" />
+        <resource-file src="src\android\res\drawable-hdpi\action11.png" target="res\drawable-hdpi\action11.png" />
+        <resource-file src="src\android\res\drawable-hdpi\action12.png" target="res\drawable-hdpi\action12.png" />
+        <resource-file src="src\android\res\drawable-hdpi\action13.png" target="res\drawable-hdpi\action13.png" />
+        <resource-file src="src\android\res\drawable-hdpi\action14.png" target="res\drawable-hdpi\action14.png" />
+        <resource-file src="src\android\res\drawable-hdpi\amap_navi_lbs_sou2.png" target="res\drawable-hdpi\amap_navi_lbs_sou2.png" />
+        <resource-file src="src\android\res\drawable-hdpi\amap_navi_lbs_sou3.png" target="res\drawable-hdpi\amap_navi_lbs_sou3.png" />
+        <resource-file src="src\android\res\drawable-hdpi\amap_navi_lbs_sou4.png" target="res\drawable-hdpi\amap_navi_lbs_sou4.png" />
+        <resource-file src="src\android\res\drawable-hdpi\amap_navi_lbs_sou5.png" target="res\drawable-hdpi\amap_navi_lbs_sou5.png" />
+        <resource-file src="src\android\res\drawable-hdpi\amap_navi_lbs_sou6.png" target="res\drawable-hdpi\amap_navi_lbs_sou6.png" />
+        <resource-file src="src\android\res\drawable-hdpi\amap_navi_lbs_sou7.png" target="res\drawable-hdpi\amap_navi_lbs_sou7.png" />
+        <resource-file src="src\android\res\drawable-hdpi\amap_navi_lbs_sou8.png" target="res\drawable-hdpi\amap_navi_lbs_sou8.png" />
+        <resource-file src="src\android\res\drawable-hdpi\amap_navi_lbs_sou9.png" target="res\drawable-hdpi\amap_navi_lbs_sou9.png" />
+        <resource-file src="src\android\res\drawable-hdpi\amap_navi_lbs_sou10.png" target="res\drawable-hdpi\amap_navi_lbs_sou10.png" />
+        <resource-file src="src\android\res\drawable-hdpi\amap_navi_lbs_sou11.png" target="res\drawable-hdpi\amap_navi_lbs_sou11.png" />
+        <resource-file src="src\android\res\drawable-hdpi\amap_navi_lbs_sou12.png" target="res\drawable-hdpi\amap_navi_lbs_sou12.png" />
+        <resource-file src="src\android\res\drawable-hdpi\amap_navi_lbs_sou13.png" target="res\drawable-hdpi\amap_navi_lbs_sou13.png" />
+        <resource-file src="src\android\res\drawable-hdpi\amap_navi_lbs_sou14.png" target="res\drawable-hdpi\amap_navi_lbs_sou14.png" />
+        <resource-file src="src\android\res\drawable-hdpi\amap_navi_lbs_sou15.png" target="res\drawable-hdpi\amap_navi_lbs_sou15.png" />
+        <resource-file src="src\android\res\drawable-hdpi\amap_navi_lbs_sou16.png" target="res\drawable-hdpi\amap_navi_lbs_sou16.png" />
+        <resource-file src="src\android\res\drawable-hdpi\amap_navi_lbs_sou17.png" target="res\drawable-hdpi\amap_navi_lbs_sou17.png" />
+        <resource-file src="src\android\res\drawable-hdpi\amap_navi_lbs_sou18.png" target="res\drawable-hdpi\amap_navi_lbs_sou18.png" />
+        <resource-file src="src\android\res\drawable-hdpi\amap_navi_lbs_sou20.png" target="res\drawable-hdpi\amap_navi_lbs_sou20.png" />
+        <resource-file src="src\android\res\drawable-hdpi\b1.png" target="res\drawable-hdpi\b1.png" />
+        <resource-file src="src\android\res\drawable-hdpi\b2.png" target="res\drawable-hdpi\b2.png" />
+        <resource-file src="src\android\res\drawable-hdpi\bubble_car_ferry.png" target="res\drawable-hdpi\bubble_car_ferry.png" />
+        <resource-file src="src\android\res\drawable-hdpi\cameraicon.png" target="res\drawable-hdpi\cameraicon.png" />
+        <resource-file src="src\android\res\drawable-hdpi\car.png" target="res\drawable-hdpi\car.png" />
+        <resource-file src="src\android\res\drawable-hdpi\caricon.png" target="res\drawable-hdpi\caricon.png" />
+        <resource-file src="src\android\res\drawable-hdpi\custtexture.png" target="res\drawable-hdpi\custtexture.png" />
+        <resource-file src="src\android\res\drawable-hdpi\custtexture_aolr.png" target="res\drawable-hdpi\custtexture_aolr.png" />
+        <resource-file src="src\android\res\drawable-hdpi\custtexture_bad.png" target="res\drawable-hdpi\custtexture_bad.png" />
+        <resource-file src="src\android\res\drawable-hdpi\custtexture_grayred.png" target="res\drawable-hdpi\custtexture_grayred.png" />
+        <resource-file src="src\android\res\drawable-hdpi\custtexture_green.png" target="res\drawable-hdpi\custtexture_green.png" />
+        <resource-file src="src\android\res\drawable-hdpi\custtexture_no.png" target="res\drawable-hdpi\custtexture_no.png" />
+        <resource-file src="src\android\res\drawable-hdpi\custtexture_slow.png" target="res\drawable-hdpi\custtexture_slow.png" />
+        <resource-file src="src\android\res\drawable-hdpi\default_generalsearch_sugg_searchicon_normal.png" target="res\drawable-hdpi\default_generalsearch_sugg_searchicon_normal.png" />
+        <resource-file src="src\android\res\drawable-hdpi\edog_bus_lane_left.png" target="res\drawable-hdpi\edog_bus_lane_left.png" />
+        <resource-file src="src\android\res\drawable-hdpi\edog_bus_lane_right.png" target="res\drawable-hdpi\edog_bus_lane_right.png" />
+        <resource-file src="src\android\res\drawable-hdpi\edog_camera_left.png" target="res\drawable-hdpi\edog_camera_left.png" />
+        <resource-file src="src\android\res\drawable-hdpi\edog_camera_right.png" target="res\drawable-hdpi\edog_camera_right.png" />
+        <resource-file src="src\android\res\drawable-hdpi\edog_emergency_left.png" target="res\drawable-hdpi\edog_emergency_left.png" />
+        <resource-file src="src\android\res\drawable-hdpi\edog_emergency_right.png" target="res\drawable-hdpi\edog_emergency_right.png" />
+        <resource-file src="src\android\res\drawable-hdpi\edog_light_left.png" target="res\drawable-hdpi\edog_light_left.png" />
+        <resource-file src="src\android\res\drawable-hdpi\edog_light_right.png" target="res\drawable-hdpi\edog_light_right.png" />
+        <resource-file src="src\android\res\drawable-hdpi\edog_unknown_left.png" target="res\drawable-hdpi\edog_unknown_left.png" />
+        <resource-file src="src\android\res\drawable-hdpi\edog_unknown_right.png" target="res\drawable-hdpi\edog_unknown_right.png" />
+        <resource-file src="src\android\res\drawable-hdpi\end.png" target="res\drawable-hdpi\end.png" />
+        <resource-file src="src\android\res\drawable-hdpi\ic_launcher.png" target="res\drawable-hdpi\ic_launcher.png" />
+        <resource-file src="src\android\res\drawable-hdpi\lane00.png" target="res\drawable-hdpi\lane00.png" />
+        <resource-file src="src\android\res\drawable-hdpi\lane0f.png" target="res\drawable-hdpi\lane0f.png" />
+        <resource-file src="src\android\res\drawable-hdpi\lane1f.png" target="res\drawable-hdpi\lane1f.png" />
+        <resource-file src="src\android\res\drawable-hdpi\lane2f.png" target="res\drawable-hdpi\lane2f.png" />
+        <resource-file src="src\android\res\drawable-hdpi\lane3f.png" target="res\drawable-hdpi\lane3f.png" />
+        <resource-file src="src\android\res\drawable-hdpi\lane4f.png" target="res\drawable-hdpi\lane4f.png" />
+        <resource-file src="src\android\res\drawable-hdpi\lane5f.png" target="res\drawable-hdpi\lane5f.png" />
+        <resource-file src="src\android\res\drawable-hdpi\lane6f.png" target="res\drawable-hdpi\lane6f.png" />
+        <resource-file src="src\android\res\drawable-hdpi\lane7f.png" target="res\drawable-hdpi\lane7f.png" />
+        <resource-file src="src\android\res\drawable-hdpi\lane8f.png" target="res\drawable-hdpi\lane8f.png" />
+        <resource-file src="src\android\res\drawable-hdpi\lane9f.png" target="res\drawable-hdpi\lane9f.png" />
+        <resource-file src="src\android\res\drawable-hdpi\lane20.png" target="res\drawable-hdpi\lane20.png" />
+        <resource-file src="src\android\res\drawable-hdpi\laneaf.png" target="res\drawable-hdpi\laneaf.png" />
+        <resource-file src="src\android\res\drawable-hdpi\lanebf.png" target="res\drawable-hdpi\lanebf.png" />
+        <resource-file src="src\android\res\drawable-hdpi\lanecf.png" target="res\drawable-hdpi\lanecf.png" />
+        <resource-file src="src\android\res\drawable-hdpi\lanedf.png" target="res\drawable-hdpi\lanedf.png" />
+        <resource-file src="src\android\res\drawable-hdpi\laneef.png" target="res\drawable-hdpi\laneef.png" />
+        <resource-file src="src\android\res\drawable-hdpi\lbs_navi_tmcbar_bg.9.png" target="res\drawable-hdpi\lbs_navi_tmcbar_bg.9.png" />
+        <resource-file src="src\android\res\drawable-hdpi\location.png" target="res\drawable-hdpi\location.png" />
+        <resource-file src="src\android\res\drawable-hdpi\navi_direction.png" target="res\drawable-hdpi\navi_direction.png" />
+        <resource-file src="src\android\res\drawable-hdpi\navi_end.png" target="res\drawable-hdpi\navi_end.png" />
+        <resource-file src="src\android\res\drawable-hdpi\navi_start.png" target="res\drawable-hdpi\navi_start.png" />
+        <resource-file src="src\android\res\drawable-hdpi\navi_way.png" target="res\drawable-hdpi\navi_way.png" />
+        <resource-file src="src\android\res\drawable-hdpi\r1.png" target="res\drawable-hdpi\r1.png" />
+        <resource-file src="src\android\res\drawable-hdpi\start.png" target="res\drawable-hdpi\start.png" />
+        <resource-file src="src\android\res\drawable-hdpi\way.png" target="res\drawable-hdpi\way.png" />
+
+        <resource-file src="src\android\res\drawable-xxxhdpi\lbs_navi_tmcbar_bg.9.png" target="res\drawable-xxxhdpi\lbs_navi_tmcbar_bg.9.png" />
+
+        <resource-file src="src\android\res\values\colors.xml" target="res\values\amap_colors.xml" />
+        <resource-file src="src\android\res\values\dimens.xml" target="res\values\amap_dimens.xml" />
+        <resource-file src="src\android\res\values\strings.xml" target="res\values\amap_strings.xml" />
+        <!-- <resource-file src="src\android\res\values\styles.xml" target="res\values\amap_styles.xml" /> -->
+
+
+        <resource-file src="src/android/res/layout/activity_basic_navi.xml" target="res/layout/activity_basic_navi.xml" />
+
+
+        <resource-file src="src/android/libs/arm64-v8a/libAMapSDK_MAP_v6_9_4.so" target="jniLibs/arm64-v8a/libAMapSDK_MAP_v6_9_4.so" />
+        <resource-file src="src/android/libs/arm64-v8a/libAMapSDK_NAVI_v6_9_1.so" target="jniLibs/arm64-v8a/libAMapSDK_NAVI_v6_9_1.so" />
+        <resource-file src="src/android/libs/arm64-v8a/libmp3decoder.so" target="jniLibs/arm64-v8a/libmp3decoder.so" />
+        <resource-file src="src/android/libs/arm64-v8a/librtbt828.so" target="jniLibs/arm64-v8a/librtbt828.so" />
+        <resource-file src="src/android/libs/arm64-v8a/libwtbt828.so" target="jniLibs/arm64-v8a/libwtbt828.so" />
+
+        <resource-file src="src/android/libs/armeabi/libAMapSDK_MAP_v6_9_4.so" target="jniLibs/armeabi/libAMapSDK_MAP_v6_9_4.so" />
+        <resource-file src="src/android/libs/armeabi/libAMapSDK_NAVI_v6_9_1.so" target="jniLibs/armeabi/libAMapSDK_NAVI_v6_9_1.so" />
+        <resource-file src="src/android/libs/armeabi/libmp3decoder.so" target="jniLibs/armeabi/libmp3decoder.so" />
+        <resource-file src="src/android/libs/armeabi/librtbt828.so" target="jniLibs/armeabi/librtbt828.so" />
+        <resource-file src="src/android/libs/armeabi/libwtbt828.so" target="jniLibs/armeabi/libwtbt828.so" />
+
+        <resource-file src="src/android/libs/armeabi-v7a/libAMapSDK_MAP_v6_9_4.so" target="jniLibs/armeabi-v7a/libAMapSDK_MAP_v6_9_4.so" />
+        <resource-file src="src/android/libs/armeabi-v7a/libAMapSDK_NAVI_v6_9_1.so" target="jniLibs/armeabi-v7a/libAMapSDK_NAVI_v6_9_1.so" />
+        <resource-file src="src/android/libs/armeabi-v7a/libmp3decoder.so" target="jniLibs/armeabi-v7a/libmp3decoder.so" />
+        <resource-file src="src/android/libs/armeabi-v7a/librtbt828.so" target="jniLibs/armeabi-v7a/librtbt828.so" />
+        <resource-file src="src/android/libs/armeabi-v7a/libwtbt828.so" target="jniLibs/armeabi-v7a/libwtbt828.so" />
+
+        <resource-file src="src/android/libs/x86/libAMapSDK_MAP_v6_9_4.so" target="jniLibs/x86/libAMapSDK_MAP_v6_9_4.so" />
+        <resource-file src="src/android/libs/x86/libAMapSDK_NAVI_v6_9_1.so" target="jniLibs/x86/libAMapSDK_NAVI_v6_9_1.so" />
+        <resource-file src="src/android/libs/x86/libmp3decoder.so" target="jniLibs/x86/libmp3decoder.so" />
+        <resource-file src="src/android/libs/x86/librtbt828.so" target="jniLibs/x86/librtbt828.so" />
+        <resource-file src="src/android/libs/x86/libwtbt828.so" target="jniLibs/x86/libwtbt828.so" />
+
+        <resource-file src="src/android/libs/x86_64/libAMapSDK_MAP_v6_9_4.so" target="jniLibs/x86_64/libAMapSDK_MAP_v6_9_4.so" />
+        <resource-file src="src/android/libs/x86_64/libAMapSDK_NAVI_v6_9_1.so" target="jniLibs/x86_64/libAMapSDK_NAVI_v6_9_1.so" />
+        <resource-file src="src/android/libs/x86_64/libmp3decoder.so" target="jniLibs/x86_64/libmp3decoder.so" />
+        <resource-file src="src/android/libs/x86_64/librtbt828.so" target="jniLibs/x86_64/librtbt828.so" />
+        <resource-file src="src/android/libs/x86_64/libwtbt828.so" target="jniLibs/x86_64/libwtbt828.so" />
+
+    </platform>
+    <platform name="ios">
+        <config-file parent="/*" target="config.xml">
+            <feature name="AkiraAmapSDK">
+                <param name="ios-package" value="AkiraAmapSDK" />
+            </feature>
+            <preference name="IOS_KEY" value="$IOS_KEY"></preference>
+        </config-file>
+
+        <config-file target="*-Info.plist" parent="NSLocationAlwaysAndWhenInUseUsageDescription" mode="merge">
+            <string>导航需要您的定位服务，否则可能无法使用，如果您需要使用后台导航功能请选择“始终允许”。</string>
+        </config-file>
+
+        <config-file target="*-Info.plist" parent="NSLocationAlwaysUsageDescription" mode="merge">
+            <string>导航需要您的定位服务，否则可能无法使用。</string>
+        </config-file>
+
+        <config-file target="*-Info.plist" parent="NSLocationWhenInUseUsageDescription" mode="merge">
+            <string>导航需要您的定位服务，否则可能无法使用。</string>
+        </config-file>
+
+        <config-file target="*-Info.plist" parent="NSAppTransportSecurity">
+            <dict>
+                <key>NSAllowsArbitraryLoads</key>
+                <true />
+            </dict>
+        </config-file>
+
+        <source-file src="src/ios/AkiraAmapSDK.m" />
+
+        <header-file src="src/ios/SpeechSynthesizer.h" />
+        <source-file src="src/ios/SpeechSynthesizer.m" />
+
+        <framework src="src/ios/libs/AMapFoundationKit.framework" custom="true" />
+        <framework src="src/ios/libs/AMapNaviKit.framework" custom="true" />
+        <framework src="src/ios/libs/MAMapKit.framework" custom="true" />
+        <framework src="src/ios/libs/AMapLocationKit.framework" custom="true" />
+
+        <framework src="CoreTelephony.framework" weak="true" />
+        <framework src="ExternalAccessory.framework" weak="true" />
+        <framework src="SystemConfiguration.framework" weak="true" />
+        <framework src="CoreLocation.framework" weak="true" />
+        <framework src="Security.framework" weak="true" />
+        <framework src="GLKit.framework" weak="true" />
+        <framework src="libz.tbd" weak="true" />
+        <framework src="libc++.tbd" weak="true" />
+
+    </platform>
+</plugin>
