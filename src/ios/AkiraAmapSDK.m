@@ -234,32 +234,47 @@
 - (void)returnLocationSuccess:(CLLocation*)location regeocode:(AMapLocationReGeocode*)regeocode
                      callback:(NSString*)callback
                        isOnce:(Boolean*) isOnce{
-
-    NSDictionary* dictionary = @{@"latitude": [NSNumber numberWithDouble:location.coordinate.latitude],
-                                 @"longitude": [NSNumber numberWithDouble:location.coordinate.longitude],
-                                 @"speed": [NSNumber numberWithDouble:location.speed],
-                                 @"bearing": [NSNumber numberWithDouble:location.course],
-                                 @"accuracy": [NSNumber numberWithDouble:location.horizontalAccuracy],
-                                 @"date": [self._dateFormatter stringFromDate:location.timestamp],
-                                 @"address": regeocode.formattedAddress ?: @"",
-                                 @"country": regeocode.country ?: @"",
-                                 @"province": regeocode.province ?: @"",
-                                 @"city": regeocode.city ?: @"",
-                                 @"cityCode": regeocode.citycode ?: @"",
-                                 @"district": regeocode.district ?: @"",
-                                 @"street": regeocode.street ?: @"",
-                                 @"streetNum": regeocode.number ?: @"",
-                                 @"adCode": regeocode.adcode ?: @"",
-                                 @"poiName": regeocode.POIName ?: @"",
-                                 @"aoiName": regeocode.AOIName ?: @""};
     
-    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
-    
-    if(!isOnce){
-        [result setKeepCallbackAsBool:YES];
+    if(regeocode){
+        NSDictionary* dictionary = @{@"latitude": [NSNumber numberWithDouble:location.coordinate.latitude],
+                                     @"longitude": [NSNumber numberWithDouble:location.coordinate.longitude],
+                                     @"speed": [NSNumber numberWithDouble:location.speed],
+                                     @"bearing": [NSNumber numberWithDouble:location.course],
+                                     @"accuracy": [NSNumber numberWithDouble:location.horizontalAccuracy],
+                                     @"date": [self._dateFormatter stringFromDate:location.timestamp],
+                                     @"address": regeocode.formattedAddress ?: @"",
+                                     @"country": regeocode.country ?: @"",
+                                     @"province": regeocode.province ?: @"",
+                                     @"city": regeocode.city ?: @"",
+                                     @"cityCode": regeocode.citycode ?: @"",
+                                     @"district": regeocode.district ?: @"",
+                                     @"street": regeocode.street ?: @"",
+                                     @"streetNum": regeocode.number ?: @"",
+                                     @"adCode": regeocode.adcode ?: @"",
+                                     @"poiName": regeocode.POIName ?: @"",
+                                     @"aoiName": regeocode.AOIName ?: @""};
+        
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
+        
+        if(!isOnce){
+            [result setKeepCallbackAsBool:YES];
+        }
+        
+        [self.commandDelegate sendPluginResult:result callbackId:callback];
     }
+    else
+    {
+        
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"定位失败"];
+        
+        if(!isOnce){
+            [result setKeepCallbackAsBool:YES];
+        }
+        
+        [self.commandDelegate sendPluginResult:result callbackId:callback];
+    }
+
     
-    [self.commandDelegate sendPluginResult:result callbackId:callback];
 }
 
 - (void)initDriveView

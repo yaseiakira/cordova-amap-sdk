@@ -388,6 +388,7 @@ public class AkiraAmapSDK extends CordovaPlugin implements ActivityCompat.OnRequ
                                 Log.e(TAG, "Watch Locatioin json error:" + e);
 
                                 PluginResult result = new PluginResult(PluginResult.Status.ERROR, e.getMessage());
+                                result.setKeepCallback(true);
                                 watchCallbackContext.sendPluginResult(result);
                             }
 
@@ -395,6 +396,7 @@ public class AkiraAmapSDK extends CordovaPlugin implements ActivityCompat.OnRequ
                             //显示错误信息ErrCode是错误码，errInfo是错误信息，详见错误码表。
                             Log.e(TAG, "Locatioin error:" + aMapLocation.getErrorCode());
                             PluginResult result = new PluginResult(PluginResult.Status.ERROR, aMapLocation.getErrorInfo());
+                            result.setKeepCallback(true);
                             watchCallbackContext.sendPluginResult(result);
                         }
                     }
