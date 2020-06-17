@@ -2,6 +2,7 @@ package com.colorfulsquare.akira;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -9,6 +10,11 @@ import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.location.Location;
+import android.app.AlarmManager;
+import android.os.Build;
+import android.os.SystemClock;
+import android.app.PendingIntent;
 
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
@@ -25,6 +31,7 @@ import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationClientOption.AMapLocationMode;
 import com.amap.api.location.AMapLocationListener;
+import com.amap.api.location.APSService;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -68,10 +75,35 @@ public class AkiraAmapSDK extends CordovaPlugin implements ActivityCompat.OnRequ
     private AMapLocationClient watchLocationClient = null;
     private AMapLocationClientOption watchlocationOption = null;
 
+    //上一次有效的经纬度
+    private double lastLat = 0;
+    private double lastLng = 0;
+
+    private int minSpeed = 2; //最小速度
+    private float minFilter = 50; //最小过滤距离
+    private int minInteval = 2; //最小间隔时间 :秒
+    private float distanceFilter = 50; //最小过滤距离
+
+    private SimpleDateFormat _simpleDateFormat;
+
+
     @Override
     public void pluginInitialize() {
         if (isNeedCheck) {
             checkPermissions(permissions);
+        }
+
+        AlarmManager alarmManager = (AlarmManager) cordova.getContext().getSystemService(Context.ALARM_SERVICE);
+
+        Intent aPSServiceIntent = new Intent(cordova.getContext(), APSService.class);
+        PendingIntent aPSServicePendingIntent = PendingIntent.getService(cordova.getContext(), 0, aPSServiceIntent, 0);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), aPSServicePendingIntent);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), aPSServicePendingIntent);
+        } else {
+            alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(), 10 * 1000, aPSServicePendingIntent);
         }
     }
 
@@ -144,6 +176,7 @@ public class AkiraAmapSDK extends CordovaPlugin implements ActivityCompat.OnRequ
     /*插件公开方法:开启持续导航*/
     private void watchLocation(JSONArray args, CallbackContext callbackContext) throws JSONException {
         this.watchCallbackContext = callbackContext;
+        this.stopWatchLocation();
         this.initAMapWatchLocation(args);
         watchLocationClient.startLocation();
     }
@@ -158,6 +191,20 @@ public class AkiraAmapSDK extends CordovaPlugin implements ActivityCompat.OnRequ
                     needRequestPermissonList.toArray(
                             new String[needRequestPermissonList.size()]),
                     PERMISSON_REQUESTCODE);
+        }
+    }
+
+    /**
+     * 停止定位
+     */
+    private void stopWatchLocation() {
+        if (watchLocationClient != null) {
+            watchlocationOption = null;
+            if (watchLocationClient.isStarted()) {
+                watchLocationClient.stopLocation();
+            }
+            watchLocationClient.onDestroy();
+            watchLocationClient = null;
         }
     }
 
@@ -244,18 +291,19 @@ public class AkiraAmapSDK extends CordovaPlugin implements ActivityCompat.OnRequ
 
     /* 内部方法:初始化一次性定位 */
     private void initAMapLocation() {
+        _simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         if (locationClient == null) {
             locationClient = new AMapLocationClient(this.cordova.getActivity().getApplicationContext());
 
             if (locationOption == null) {
                 locationOption = new AMapLocationClientOption();
-                AMapLocationMode accuracy = AMapLocationMode.Hight_Accuracy;
-                int interval = 2000;
                 boolean needAddress = true;
 
-                locationOption.setLocationMode(accuracy);
+                locationOption.setLocationMode(AMapLocationMode.Hight_Accuracy);
                 locationOption.setNeedAddress(needAddress);
-                locationOption.setInterval(interval);
+                locationOption.setInterval(2000);
+                locationOption.setGpsFirst(true);
+                locationOption.setSensorEnable(true);
 
                 //设置为单次定位
                 locationOption.setOnceLocation(true);
@@ -266,9 +314,6 @@ public class AkiraAmapSDK extends CordovaPlugin implements ActivityCompat.OnRequ
                 public void onLocationChanged(AMapLocation aMapLocation) {
                     if (aMapLocation != null) {
                         if (aMapLocation.getErrorCode() == 0) {
-                            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                            Date date = new Date(aMapLocation.getTime());
-                            df.format(date);//定位时间
 
                             JSONObject locationInfo = new JSONObject();
                             try {
@@ -278,7 +323,7 @@ public class AkiraAmapSDK extends CordovaPlugin implements ActivityCompat.OnRequ
                                 locationInfo.put("accuracy", aMapLocation.getAccuracy()); //获取精度信息
                                 locationInfo.put("speed", aMapLocation.getSpeed()); //获取速度信息
                                 locationInfo.put("bearing", aMapLocation.getBearing()); //获取方向信息
-                                locationInfo.put("date", date); //定位时间
+                                locationInfo.put("date", _simpleDateFormat.format(new Date(aMapLocation.getTime()))); //定位时间
                                 locationInfo.put("address", aMapLocation.getAddress()); //地址，如果option中设置isNeedAddress为false，则没有此结果
                                 locationInfo.put("country", aMapLocation.getCountry()); //国家信息
                                 locationInfo.put("province", aMapLocation.getProvince()); //省信息
@@ -320,31 +365,50 @@ public class AkiraAmapSDK extends CordovaPlugin implements ActivityCompat.OnRequ
 
     /* 内部方法:初始化后台持续性定位 */
     private void initAMapWatchLocation(JSONArray args) throws JSONException {
+        _simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         if (watchLocationClient == null) {
             watchLocationClient = new AMapLocationClient(this.cordova.getActivity().getApplicationContext());
 
             if (watchlocationOption == null) {
                 watchlocationOption = new AMapLocationClientOption();
-                AMapLocationMode accuracy = AMapLocationMode.Hight_Accuracy;
 
-                int interval = 2000;
+
                 boolean needAddress = true;
 
                 if (args.length() > 0) {
                     JSONObject options = args.getJSONObject(0);
                     if (options != null) {
                         if (options.has("interval")) {
-                            interval = options.optInt("interval", 2000);
+                            minInteval = options.optInt("interval", 2000) / 1000;
                         }
                         if (options.has("needAddress")) {
                             needAddress = options.optBoolean("needAddress", false);
                         }
+
+                        int accuracy = options.optInt("accuracy", 0);
+
+                        switch (accuracy) {
+                            case 0:
+                                watchlocationOption.setLocationMode(AMapLocationMode.Battery_Saving);
+                                break;
+                            case 1:
+                                watchlocationOption.setLocationMode(AMapLocationMode.Device_Sensors);
+                                break;
+                            case 2:
+                                watchlocationOption.setLocationMode(AMapLocationMode.Hight_Accuracy);
+                                break;
+                            default:
+                                watchlocationOption.setLocationMode(AMapLocationMode.Hight_Accuracy);
+                                break;
+                        }
                     }
                 }
 
-                watchlocationOption.setLocationMode(accuracy);
                 watchlocationOption.setNeedAddress(needAddress);
-                watchlocationOption.setInterval(interval);
+                watchlocationOption.setInterval(minInteval * 1000);
+                watchlocationOption.setGpsFirst(true);
+                watchlocationOption.setSensorEnable(true);
+
 
                 //设置为持续定位
                 watchlocationOption.setOnceLocation(false);
@@ -355,19 +419,45 @@ public class AkiraAmapSDK extends CordovaPlugin implements ActivityCompat.OnRequ
                 public void onLocationChanged(AMapLocation aMapLocation) {
                     if (aMapLocation != null) {
                         if (aMapLocation.getErrorCode() == 0) {
-                            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                            Date date = new Date(aMapLocation.getTime());
-                            df.format(date);//定位时间
+
+                            if ((double) aMapLocation.getAccuracy() > 200) {
+                                Log.i(TAG, "精度大于200,抛弃该次定位:" + aMapLocation.getAccuracy());
+                                return;
+                            }
+
+                            double currentLat = aMapLocation.getLatitude();
+                            double currentLng = aMapLocation.getLongitude();
+
+                            if (lastLat == currentLat && lastLng == currentLng) {
+                                Log.i(TAG, "与上一次定位相同,不返回数据");
+                                return;
+                            }
+
+                            //根据速度设置过滤距离
+                            adjustDistanceFilter(aMapLocation);
+
+                            if (lastLat > 0 && aMapLocation.getSpeed() <= 0) {
+                                //计算与上一个有效点之间的距离
+                                float[] results = new float[1];
+                                Location.distanceBetween(lastLat, lastLng, currentLat, currentLng, results);
+                                if (results[0] < 10) {
+                                    Log.i(TAG, "与上一次定位距离小于10m,抛弃该次定位");
+                                    return;
+                                }
+                            }
+
+                            lastLat = currentLat;
+                            lastLng = currentLng;
 
                             JSONObject locationInfo = new JSONObject();
                             try {
                                 locationInfo.put("locationType", aMapLocation.getLocationType()); //获取当前定位结果来源，如网络定位结果，详见定位类型表
-                                locationInfo.put("latitude", aMapLocation.getLatitude()); //获取纬度
-                                locationInfo.put("longitude", aMapLocation.getLongitude()); //获取经度
+                                locationInfo.put("latitude", currentLat); //获取纬度
+                                locationInfo.put("longitude", currentLng); //获取经度
                                 locationInfo.put("accuracy", aMapLocation.getAccuracy()); //获取精度信息
                                 locationInfo.put("speed", aMapLocation.getSpeed()); //获取速度信息
                                 locationInfo.put("bearing", aMapLocation.getBearing()); //获取方向信息
-                                locationInfo.put("date", date); //定位时间
+                                locationInfo.put("date", _simpleDateFormat.format(new Date(aMapLocation.getTime()))); //定位时间
                                 locationInfo.put("address", aMapLocation.getAddress()); //地址，如果option中设置isNeedAddress为false，则没有此结果
                                 locationInfo.put("country", aMapLocation.getCountry()); //国家信息
                                 locationInfo.put("province", aMapLocation.getProvince()); //省信息
@@ -394,7 +484,7 @@ public class AkiraAmapSDK extends CordovaPlugin implements ActivityCompat.OnRequ
 
                         } else {
                             //显示错误信息ErrCode是错误码，errInfo是错误信息，详见错误码表。
-                            Log.e(TAG, "Locatioin error:" + aMapLocation.getErrorCode());
+                            Log.e(TAG, "Watch Locatioin error:" + aMapLocation.getErrorCode());
                             PluginResult result = new PluginResult(PluginResult.Status.ERROR, aMapLocation.getErrorInfo());
                             result.setKeepCallback(true);
                             watchCallbackContext.sendPluginResult(result);
@@ -407,4 +497,21 @@ public class AkiraAmapSDK extends CordovaPlugin implements ActivityCompat.OnRequ
 
     }
 
+    private void adjustDistanceFilter(AMapLocation amapLocation) {
+        float speed = amapLocation.getSpeed();
+
+        if (speed < minSpeed) {
+            if (Math.abs(distanceFilter - minFilter) > 0.1f) {
+                distanceFilter = minFilter;
+            }
+        } else {
+            float lastSpeed = distanceFilter / minInteval;
+            if ((Math.abs(lastSpeed - speed) / lastSpeed > 0.1f) || (lastSpeed <= 0)) {
+                float newSpeed = (speed + 0.5f);
+                distanceFilter = newSpeed * minInteval;
+
+            }
+
+        }
+    }
 }

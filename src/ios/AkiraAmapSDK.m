@@ -31,6 +31,14 @@
 
 @property (nonatomic)BOOL completionBlockInitialized;
 
+@property (nonatomic)double lastLat;
+@property (nonatomic)double lastLng;
+
+@property (nonatomic)CGFloat minSpeed;
+@property (nonatomic)CGFloat distanceFilter;
+@property (nonatomic)CGFloat minFilter;
+@property (nonatomic)CGFloat minInterval;
+
 - (void)startNavigation:(CDVInvokedUrlCommand*)command;
 @end
 
@@ -96,9 +104,18 @@
     
     watchCallbackId = command.callbackId;
     
+    self.lastLat = 0;
+    self.lastLng = 0;
+    self.minSpeed = 2;
+    self.minFilter = 50;
+    self.minInterval = 10;
+    self.distanceFilter = self.minFilter;
+    
     [self initDateformat];
     
     [AMapServices sharedServices].apiKey = [self amapApiKey];
+    
+    [self stopWatchLocation];
     
     [self initCompleteBlock];
     [self configWatchLocationManager: command.arguments];
@@ -124,23 +141,52 @@
 }
 
 -(void) configWatchLocationManager: (NSArray *) args {
+    
     if(self._watchLocationManager == nil){
         self._watchLocationManager = [[AMapLocationManager alloc] init];
         [self._watchLocationManager setDelegate:self];
         
-        [self._watchLocationManager setDesiredAccuracy:kCLLocationAccuracyHundredMeters ];
+        int accuracy = [[[args objectAtIndex:0] objectForKey:@"accuracy"] intValue];
+        
+        switch(accuracy){
+            case 0:
+                [self._watchLocationManager setDesiredAccuracy:kCLLocationAccuracyBestForNavigation];
+                [self._watchLocationManager setLocationTimeout:5];
+                [self._watchLocationManager setLocatingWithReGeocode:NO];
+                break;
+            case 1:
+                [self._watchLocationManager setDesiredAccuracy:kCLLocationAccuracyHundredMeters ];
+                [self._watchLocationManager setLocationTimeout:5];
+                [self._watchLocationManager setLocatingWithReGeocode:YES];
+                break;
+            case 2:
+                [self._watchLocationManager setDesiredAccuracy:kCLLocationAccuracyBest ];
+                [self._watchLocationManager setLocationTimeout:15];
+                [self._watchLocationManager setLocatingWithReGeocode:YES];
+                break;
+            default:
+                [self._watchLocationManager setDesiredAccuracy:kCLLocationAccuracyHundredMeters ];
+                [self._watchLocationManager setLocationTimeout:5];
+                [self._watchLocationManager setLocatingWithReGeocode:NO];
+                break;
+        }
+        
         
         [self._watchLocationManager setPausesLocationUpdatesAutomatically:NO];
         
         [self._watchLocationManager setAllowsBackgroundLocationUpdates:YES];
         
-        [self._watchLocationManager setLocationTimeout:10];
-        
         [self._watchLocationManager setReGeocodeTimeout:5];
         
         // [[args objectAtIndex:0] objectForKey:@"needAddress"]
         
-        [self._watchLocationManager setLocatingWithReGeocode:YES];
+        
+    }
+}
+
+- (void) stopWatchLocation {
+    if(self._watchLocationManager != nil){
+        [self._watchLocationManager stopUpdatingLocation];
     }
 }
 
@@ -184,7 +230,28 @@
 }
 
 - (void) amapLocationManager:(AMapLocationManager *)manager didUpdateLocation:(CLLocation *)location reGeocode:(AMapLocationReGeocode *)reGeocode{
+    
+    [self adjustDistanceFilter:location];
+    
     [self returnLocationSuccess:location regeocode:reGeocode callback:watchCallbackId isOnce:false];
+}
+
+- (void) adjustDistanceFilter:(CLLocation*)location{
+    if(location.speed < self.minSpeed){
+        if(fabs(self.distanceFilter - self.minFilter) > 0.1f){
+            self.distanceFilter = self.minFilter;
+            self._locationManager.distanceFilter = self.distanceFilter;
+        }
+    } else {
+        CGFloat lastSpeed = self.distanceFilter / self.minInterval;
+        if((fabs(lastSpeed-location.speed) / lastSpeed > 0.1f) || lastSpeed < 0){
+            CGFloat newSpeed = (int)(location.speed + 0.5f);
+            CGFloat newFilter = newSpeed * self.minInterval;
+            
+            self.distanceFilter = newFilter;
+            self._locationManager.distanceFilter = self.distanceFilter;
+        }
+    }
 }
 
 // 返回导航数据结果
@@ -236,8 +303,37 @@
                        isOnce:(Boolean*) isOnce{
     
     if(regeocode){
-        NSDictionary* dictionary = @{@"latitude": [NSNumber numberWithDouble:location.coordinate.latitude],
-                                     @"longitude": [NSNumber numberWithDouble:location.coordinate.longitude],
+        
+        if(location.horizontalAccuracy > 200){
+            NSLog(@"精度大于200，抛弃该次定位：%f",location.horizontalAccuracy);
+            return;
+        }
+        double currentLat = location.coordinate.latitude;
+        double currentLng = location.coordinate.longitude;
+        
+        if(_lastLat == currentLat && _lastLng == currentLng){
+            NSLog(@"与上一次定位相同，不返回数据");
+            return;
+        }
+        
+        if(location.speed <= 0 && self.lastLat > 0){
+            CLLocation *before= [[CLLocation alloc] initWithLatitude:self.lastLat longitude:self.lastLng];
+            
+            CLLocation *current = [[CLLocation alloc] initWithLatitude:currentLat longitude:currentLng];
+            
+            CLLocationDistance meters=[current distanceFromLocation:before];
+            
+            if(meters < 10){
+                NSLog(@"与上一次定位距离小于10m,抛弃该次定位");
+                return;
+            }
+        }
+        
+        self.lastLat = currentLat;
+        self.lastLng = currentLng;
+        
+        NSDictionary* dictionary = @{@"latitude": [NSNumber numberWithDouble:currentLat],
+                                     @"longitude": [NSNumber numberWithDouble:currentLng],
                                      @"speed": [NSNumber numberWithDouble:location.speed],
                                      @"bearing": [NSNumber numberWithDouble:location.course],
                                      @"accuracy": [NSNumber numberWithDouble:location.horizontalAccuracy],
